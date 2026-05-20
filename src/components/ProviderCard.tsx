@@ -2,8 +2,9 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { QuotaBar } from './QuotaBar';
 import { LeadTable } from './LeadTable';
+import { ProviderWithAssignments } from '@/types';
 
-export function ProviderCard({ provider }: { provider: any }) {
+export function ProviderCard({ provider }: { provider: ProviderWithAssignments }) {
   const isFull = provider.leadsReceived >= provider.monthlyQuota;
 
   return (

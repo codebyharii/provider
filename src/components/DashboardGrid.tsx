@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { ProviderCard } from './ProviderCard';
 import { Spinner } from './ui/Spinner';
+import { ProviderWithAssignments } from '@/types';
 
 export function DashboardGrid() {
-  const [providers, setProviders] = useState<any[]>([]);
+  const [providers, setProviders] = useState<ProviderWithAssignments[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,9 +25,9 @@ export function DashboardGrid() {
 
       setProviders(data);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }

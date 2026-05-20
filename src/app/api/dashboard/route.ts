@@ -27,7 +27,7 @@ export async function GET() {
     });
 
     return NextResponse.json(providers);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Dashboard fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
   }

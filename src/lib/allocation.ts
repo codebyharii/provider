@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { Prisma, Provider } from '@prisma/client';
 
 // Hard-coded rules per service (Provider IDs)
 const MANDATORY_RULES: Record<number, number[]> = {
@@ -36,11 +37,17 @@ export async function allocateLead(leadId: number, serviceId: number) {
     const mandatoryProviderIds = MANDATORY_RULES[serviceId] || [];
     const poolProviderIds = FAIR_POOLS[serviceId] || [];
 
-    // Fetch current state of relevant providers (mandatory + pool)
-    const allRelevantIds = Array.from(new Set([...mandatoryProviderIds, ...poolProviderIds]));
-    const providers = await tx.provider.findMany({
-      where: { id: { in: allRelevantIds } },
-    });
+    // Fetch and lock current state of relevant providers (mandatory + pool)
+    // We sort the IDs to acquire locks in a consistent order and prevent deadlocks
+    const allRelevantIdsSorted = Array.from(new Set([...mandatoryProviderIds, ...poolProviderIds])).sort((a, b) => a - b);
+    const providers = allRelevantIdsSorted.length > 0
+      ? await tx.$queryRaw<Provider[]>`
+          SELECT * FROM "Provider"
+          WHERE "id" IN (${Prisma.join(allRelevantIdsSorted)})
+          ORDER BY "id" ASC
+          FOR UPDATE
+        `
+      : [];
 
     const providerMap = new Map(providers.map(p => [p.id, p]));
 

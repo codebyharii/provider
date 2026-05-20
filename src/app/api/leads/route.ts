@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const result = leadSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error.errors }, { status: 400 });
+      return NextResponse.json({ error: result.error.issues }, { status: 400 });
     }
 
     const data = result.data;
@@ -55,8 +55,9 @@ export async function POST(req: NextRequest) {
       assignedProviders
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Lead submission error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

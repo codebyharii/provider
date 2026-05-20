@@ -30,8 +30,44 @@ export function TestPanel() {
       });
       const data = await res.json();
       appendLog(`Webhook [${eventId}]: ${res.status} - ${JSON.stringify(data)}`);
-    } catch (err: any) {
-      appendLog(`Error: ${err.message}`);
+    } catch (err) {
+      appendLog(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function triggerConcurrencyTest() {
+    setLoading(true);
+    appendLog("Starting concurrency test: Generating 10 leads instantly...");
+    try {
+      const services = [1, 2, 3];
+      const promises = Array.from({ length: 10 }).map((_, i) => {
+        const phone = `+1${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+        const serviceId = services[Math.floor(Math.random() * services.length)];
+        const payload = {
+          name: `Concurrent User ${i + 1}`,
+          phone,
+          city: `City ${String.fromCharCode(65 + i)}`,
+          description: `Need service request details for concurrent test ${i + 1}.`,
+          serviceId
+        };
+        return fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(async res => {
+          const data = await res.json();
+          return { status: res.status, data };
+        });
+      });
+
+      const results = await Promise.all(promises);
+      const successes = results.filter(r => r.status === 201).length;
+      const failures = results.length - successes;
+      appendLog(`Concurrency test complete: ${successes} succeeded, ${failures} failed.`);
+    } catch (err) {
+      appendLog(`Concurrency test error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -59,6 +95,14 @@ export function TestPanel() {
           </div>
           <Button onClick={triggerQuotaReset} disabled={loading} className="w-full">
             Trigger Webhook (Quota Reset)
+          </Button>
+        </div>
+
+        <div className="space-y-4 border-b border-soft pb-6">
+          <h4 className="text-sm font-semibold text-primary">Concurrency & Fair Allocation Test</h4>
+          <p className="text-xs text-muted">Submit 10 lead creation requests concurrently using Promise.all.</p>
+          <Button onClick={triggerConcurrencyTest} disabled={loading} className="w-full">
+            Generate 10 Leads Instantly
           </Button>
         </div>
 

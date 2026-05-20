@@ -10,17 +10,21 @@ class SSEManager {
     this.clients.add(client);
   }
 
-  removeClient(client: Client) {
-    this.clients.delete(client);
+  removeClient(clientId: string) {
+    this.clients.forEach(client => {
+      if (client.id === clientId) {
+        this.clients.delete(client);
+      }
+    });
   }
 
-  broadcast(data: any) {
+  broadcast(data: unknown) {
     const payload = `data: ${JSON.stringify(data)}\n\n`;
     this.clients.forEach(client => {
       try {
         client.controller.enqueue(new TextEncoder().encode(payload));
-      } catch (err) {
-        this.removeClient(client);
+      } catch {
+        this.removeClient(client.id);
       }
     });
   }

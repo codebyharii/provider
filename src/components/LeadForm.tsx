@@ -17,7 +17,8 @@ export function LeadForm() {
     setError('');
     setSuccess('');
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const payload = {
       name: formData.get('name') as string,
       phone: formData.get('phone') as string,
@@ -37,9 +38,9 @@ export function LeadForm() {
       if (!res.ok) throw new Error(data.error || 'Failed to submit lead');
       
       setSuccess('Lead submitted successfully! Your request has been assigned to our partners.');
-      e.currentTarget.reset();
-    } catch (err: any) {
-      setError(err.message);
+      form.reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }

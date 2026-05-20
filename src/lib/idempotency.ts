@@ -1,6 +1,6 @@
 import { prisma } from './prisma';
 
-export async function checkIdempotency(eventId: string, type: string): Promise<boolean> {
+export async function checkIdempotency(eventId: string): Promise<boolean> {
   const existing = await prisma.webhookEvent.findUnique({
     where: { id: eventId }
   });
@@ -10,13 +10,4 @@ export async function checkIdempotency(eventId: string, type: string): Promise<b
   }
 
   return false; // Not processed
-}
-
-export async function logWebhookEvent(eventId: string, type: string) {
-  await prisma.webhookEvent.create({
-    data: {
-      id: eventId,
-      type
-    }
-  });
 }
