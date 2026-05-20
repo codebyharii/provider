@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     const result = leadSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error.issues }, { status: 400 });
+      const errorMessage = result.error.issues.map(issue => issue.message).join(', ');
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     const data = result.data;
