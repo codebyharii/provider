@@ -9,7 +9,7 @@ This document provides a detailed overview of the setup instructions, allocation
 ### Local Environment Setup
 1. **Clone the repository and install dependencies**:
    ```bash
-   git clone <your-repository-url>
+   git clone https://github.com/codebyharii/provider.git
    cd provider/prowider
    npm install
    ```
